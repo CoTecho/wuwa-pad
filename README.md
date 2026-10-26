@@ -72,6 +72,36 @@ Remove-Item scripts\watch.run      # 停止看护
 'exit' | Set-Content scripts\cmd.txt   # 关闭提权代理
 ```
 
+## 开机自启（和桌宠一起启动）
+
+Wuwa Tappo 自己就是靠计划任务在登录时以管理员身份启动的（`\WuwaTappo\ElevatedAutostart`，
+`RunLevel=HighestAvailable`），所以它天生是提权进程。要跟着它一起起来，我们也用计划任务 ——
+计划任务的 `HighestAvailable` 直接以高完整性运行，**不弹 UAC**。
+
+```powershell
+# 一次性注册（会弹一次 UAC）
+powershell -NoProfile -ExecutionPolicy Bypass -File scripts\install_autostart.ps1
+```
+
+注册后的任务：`\WuwaTappo\PadBridge`
+
+| 项 | 值 |
+|---|---|
+| 触发 | 用户登录后延迟 20 秒（比桌宠自己的 5 秒晚，确保它先起来） |
+| 身份 | `InteractiveToken` + `HighestAvailable`（提权、无 UAC） |
+| 动作 | `powershell -File scripts\start_all.ps1` |
+| 隐藏 | 是；`MultipleInstancesPolicy=IgnoreNew` |
+
+`start_all.ps1` 做三件事：拉起常驻提权代理（已起来就跳过）→ 拉起看护进程 → 立刻执行一次注入。
+看护进程只负责“注入”，**不会**把用户主动退出的桌宠再拉起来。
+
+卸载：
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File scripts\uninstall_autostart.ps1
+```
+
+> 任务里写死了 `start_all.ps1` 的绝对路径，**移动/重命名目录后要重新执行一次 install_autostart.ps1**。
 ## 默认映射
 
 | 手柄 | 键 | 手柄 | 键 |

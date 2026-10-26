@@ -16,6 +16,7 @@ if (-not (Test-Path $cfg)) {
 
 $pet = Get-Process WuwaTappo -ErrorAction SilentlyContinue | Select-Object -First 1
 if (-not $pet) {
+    if ($NoStart) { exit 0 }
     W 'pet not running, starting'
     $exe = 'C:\Program Files\WuwaTappo\WuwaTappo.exe'
     if (-not (Test-Path $exe)) { W "pet exe not found: $exe"; exit 1 }
