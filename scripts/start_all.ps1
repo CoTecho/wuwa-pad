@@ -7,10 +7,16 @@ function W($m) { "$(Get-Date -Format 'yyyy-MM-dd HH:mm:ss') $m" | Add-Content $l
 W "start_all begin (elevated=$(([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)))"
 
 # 1) elevated command agent (kept for manual inject / debugging)
+$agentPath = Join-Path $base 'agent.ps1'
+$agentRunning = $false
+foreach ($p in Get-CimInstance Win32_Process -Filter "Name='powershell.exe'" -ErrorAction SilentlyContinue) {
+    if ($p.CommandLine -and $p.CommandLine.Contains($agentPath)) { $agentRunning = $true; break }
+}
 $alive = Join-Path $base 'agent.alive'
-$fresh = $false
-if (Test-Path $alive) { $fresh = ((Get-Date) - (Get-Item $alive).LastWriteTime).TotalSeconds -lt 15 }
-if (-not $fresh) {
+if (-not $agentRunning -and (Test-Path $alive)) {
+    $agentRunning = ((Get-Date) - (Get-Item $alive).LastWriteTime).TotalSeconds -lt 5
+}
+if (-not $agentRunning) {
     Start-Process -FilePath 'powershell.exe' -WindowStyle Hidden -ArgumentList @('-NoProfile','-ExecutionPolicy','Bypass','-File',(Join-Path $base 'agent.ps1'))
     for ($i = 0; $i -lt 40; $i++) {
         Start-Sleep -Milliseconds 250
