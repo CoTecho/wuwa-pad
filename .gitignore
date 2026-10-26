@@ -1,0 +1,17 @@
+build/
+*.dll
+*.obj
+*.lib
+*.exp
+*.pdb
+*.ilk
+cmd.txt
+out.txt
+result*.txt
+agent.alive
+agent.log
+apply.log
+watch.log
+watch.run
+*.log
+*.png
