@@ -7,6 +7,14 @@
 > 常见做法是 `SendInput` 把按键全局注入 —— 但那样全屏游戏、聊天窗口都会收到。
 > 本项目改成**进程内喂事件**：直接调用桌宠自己的键盘钩子过程，输入不进系统队列。
 
+> **⚠️ 已停止维护（2026-10-27）**
+> Wuwa Tappo **1.0.2** 起官方已内置手柄支持（`WuwaTappo.exe` 的导入表里出现了 `xinput1_4.dll`，
+> 二进制里也有 `gamepad` / `DS4` 字样），本项目不再需要，建议直接卸载：
+> ```powershell
+> powershell -NoProfile -ExecutionPolicy Bypass -File scripts\uninstall_autostart.ps1
+> ```
+> 代码留作参考（如何在不注入全局输入的前提下把事件喂给别的进程）。
+
 ## 演示
 
 ![demo](docs/demo.gif)
